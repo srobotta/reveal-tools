@@ -133,6 +133,9 @@ class MdParser:
             else:
                 item += line
 
+        if len(item.replace("\r", '').replace('\n', '').strip()) > 0:
+            self._slides.append(item)
+
         return self
 
     def replacePlaceholder(self, properties: dict, text: str)-> str:
