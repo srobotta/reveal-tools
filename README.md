@@ -73,3 +73,11 @@ the header that is several times used in the slides.
 All placeholders in the template that are not used will be removed. Encoding
 e.g. use the correct html entites must be observed by the user, the script does
 a simple replacement only.
+
+There are two placeholders, that must be present in the template so that all
+functionality works. These placeholders cannot be set via the yaml header
+in the markup files. The special placeholders in the template are:
+
+- `{{__slides__}}`: The slides from the markup are inserted here.
+- `{{__theme__}}`: The theme name is put in here. This can be controlled via
+the `-c` switch and defaults to "black".

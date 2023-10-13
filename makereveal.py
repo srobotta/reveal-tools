@@ -9,6 +9,8 @@ General usage is:
 makereveal.py -i <markup_file> -t <html_template> [ -o sildesfile.html ]
 
 Parameters are:
+-c <theme> Select a Reveal theme, a corresponding file must exist in the
+           reveal installation at css/theme/<theme>.css. Defaults to black.
 -i <file>  The input file that contains the markdown. Slides are divided
            by a single line containing "---" and a linebeak. Also you may
            at metadata in the first block that is enclosed by the sepa-
@@ -62,6 +64,11 @@ class MdParser:
         """A set of key values that are set from the head of the md file
         in case there is something set."""
         
+        self.theme = 'black'
+        """The theme name to be used in the reveal.js. This is actually the
+        name of the css file (without the .css suffix) in
+        reveal_root/css/theme."""
+        
         self._slides = []
         """A list of slides."""
         
@@ -87,6 +94,18 @@ class MdParser:
         self.files.append(file)
         return self
 
+    def setTheme(self, theme):
+        """Set the reveal.js theme name and overwrite the default "black" theme.
+        
+        Parameters:
+        theme (str): name of the theme
+        
+        Returns:
+        self:
+        """
+        
+        self.theme = theme
+        return self
 
     def readFiles(self):
         """Read the markup files that were provided to the parser.
@@ -200,6 +219,10 @@ class MdParser:
         # Replace the slides placeholder with something else to prevend the elimination.
         self._html = self._html.replace('{{__slides__}}', '!###__slides__###!')
 
+        # Replace the theme name from the default or what was provided via cli argument.
+        self._html = self._html.replace('{{__theme__}}', self.theme)
+
+        # Replace all injected properties from the yaml header in the markup file(s).
         self._html = self.replacePlaceholder(self.properties, self._html)
         
         # Now replace the slides placeholder with the real slides.
@@ -222,7 +245,7 @@ def main():
     for the html file."""
 
     # List of available options that can be changed via the command line.
-    options = ['i', 'o', 't']
+    options = ['c', 'i', 'o', 't']
 
     # the output file where the result is written to, ready for use in reveal.js.
     outputFile = ''
@@ -247,7 +270,9 @@ def main():
             if not(currentCmd in options):
                 dieNice("Invalid argument %s" % currentCmd)
         elif len(currentCmd) > 0:
-            if currentCmd == 'i':
+            if currentCmd == 'c':
+                worklog.setTheme(arg)
+            elif currentCmd == 'i':
                 worklog.addFile(arg)
             elif currentCmd == 'o':
                 outputFile = arg
