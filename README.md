@@ -60,19 +60,34 @@ template:
 ---
 ```
 
-The header is treated as yml and in case it can be parsed, put into a dict
-data type in python.
+The header is treated as yaml and in case it can be parsed, put into a dict
+datatype in python.
+
 The first level element values (e.g. from somekey) will be inserted in the
-html template where the place where the placeholder `{{__somekey__`}} is
-used.
+html template where the placeholder `{{__somekey__}}` is used.
 
-The key/value pairs below template can be used inside the markup file in the
-slides. This is useful e.g. to have a larger html fragment defined above in
-the header that is several times used in the slides.
+The key/value pairs below `template:` can be used inside the markup file itself
+to use placeholders in the slides markup. This is useful e.g. to have a larger
+html fragment defined above in the header that is several times used in the slides.
 
-All placeholders in the template that are not used will be removed. Encoding
-e.g. use the correct html entites must be observed by the user, the script does
-a simple replacement only.
+If several markup files are used, the header of the later parsed file will overwrite
+all values that were set earlier. Headers are not merged into each other.
+
+### Template
+
+Templates can be build from the onces included in this repository and can be
+changed to aquire the custom needs.
+
+A template can contain placeholders in the form of `{{__name__}}` where the
+name key can be used in the yaml header of a markup file to set an actual
+value.
+
+Any placeholder that is not used in the markup file, will be removed when
+creating the final html page. 
+
+Encoding e.g. use the correct html entites must be observed by the user,
+the script does a simple replacement only and will not check if the placeholder
+is e.g. used inside a html attribute.
 
 There are two placeholders, that must be present in the template so that all
 functionality works. These placeholders cannot be set via the yaml header
