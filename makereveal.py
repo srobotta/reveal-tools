@@ -115,11 +115,14 @@ class MdParser:
 
         """
 
+        if len(self.files) == 0:
+            dieNice('No input file provided.')
+
         for fname in self.files:
             try:
                 fp = open(fname, "r")
             except:
-                dieNice('could not open file {0}'.format(fname))
+                dieNice('Could not open file {0}.'.format(fname))
             self.parseFile(fp)
             fp.close()
         return self
@@ -211,7 +214,7 @@ class MdParser:
         try:
             fp = open(template, 'r')
         except:
-            dieNice('Could not open template file ' + template)
+            dieNice('Could not open template file "%s".' % template)
         
         self._html = fp.read()
         fp.close()
@@ -268,7 +271,7 @@ def main():
         if arg[0:1] == '-':
             currentCmd = arg[1:]
             if not(currentCmd in options):
-                dieNice("Invalid argument %s" % currentCmd)
+                dieNice("Invalid argument %s." % currentCmd)
         elif len(currentCmd) > 0:
             if currentCmd == 'c':
                 worklog.setTheme(arg)
@@ -284,7 +287,7 @@ def main():
     worklog.readFiles()
     # apply the html template
     if len(templateFile) == 0 or not os.path.isfile(templateFile):
-        dieNice('Template file missing or does not exist')
+        dieNice('Template file "{0}" missing or does not exist.'.format(templateFile))
         
     content = worklog.applyTemplate(templateFile)
 
@@ -295,7 +298,7 @@ def main():
         else:
             fp = open(outputFile, "w")
     except:
-        dieNice('could not open file %s for writing result' % outputFile)
+        dieNice('Could not open file %s for writing result.' % outputFile)
 
     fp.write(worklog.getHtml())
     fp.close()
