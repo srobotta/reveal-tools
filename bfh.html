@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>{{__title__}}</title>
+
+		<meta name="description" content="{{__description__}}">
+		<meta name="author" content="{{__author__}}">
+
+		<meta property="og:description" content="{{__description__}}">
+		<meta property="og:author" content="{{__author__}}">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/simple.css" id="theme">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+		<!-- Define here the left and right footer container css. -->
+		<style>
+		    div.header {
+		        position: absolute;
+		        top: 0;
+		        left: 0;
+		        padding: 0;
+		        margin: 0;
+		    }
+                    div.footer {
+                        position: absolute;
+                        bottom: 0;
+                        padding: 0 1em;
+                        margin: 0;
+                        color: #4b647d;
+                        font-family: "UnitRoundedPro","Helvetica","Arial",sans-serif;
+                    }
+                    div.footer.left {
+                        left: 0;
+                    }
+                    div.footer.right {
+                        right: 0;
+                    }
+                </style>
+
+
+	</head>
+
+	<body>
+
+
+                        <div class="header"><img src="data:image/png;base64,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
+"/></div>
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+                        {{__slides__}}			
+			</div>
+
+		</div>
+			<!-- The footer containers. -->
+			<div class="footer left">Berner Fachhochschule | Haute école spécialisée bernoise | Bern University of Applied Sciences</div>
+                        <div class="footer right">{{__page__}}: <span class="number">1</span></div>
+
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/zoom/zoom.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/search/search.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+
+			// Also available as an ES module, see:
+			// https://revealjs.com/initialization/
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				center: true,
+				hash: true,
+				progress: false,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight ]
+			});
+
+			// Event to show the current slide number in the left footer container.
+                        Reveal.on('slidechanged', event => {
+                                document.querySelector('.footer.right .number').innerHTML = (event.indexh + 1).toString();
+                                // event.previousSlide, event.currentSlide, event.indexh, event.indexv
+                        });
+
+		</script>
+
+	</body>
+</html>
