@@ -14,14 +14,17 @@ Parameters are:
 -e         Do not copy any referenced files from the slides to the folder
            where the output file is created in.
 -i <file>  The input file that contains the markdown. Slides are divided
-           by a single line containing "---" and a linebeak. Also you may
-           at metadata in the first block that is enclosed by the sepa-
-           rator lines such as:
+           by a single line containing "---" and a linebreak. The file
+           must start with a delimiter.
+           If you add metadata in the first block, they should be enclosed
+           by the separator lines such as:
            ---
            title: my title for the slides
            description: some description
            author: Your Name
-           ...
+           template:
+             key1: value1
+           [...]
            ---
            This data is parsed as yaml and put into a key value pair so
            that inside a template the placeholder {{__key__}} is replaced
@@ -29,6 +32,10 @@ Parameters are:
            use whatever key you like, if there is a corresponding place-
            holder string in the template file, this content is written
            into the final output html.
+           The keys below "template:" can be used inside the markdown to
+           use placeholders in the markdown (e.g. {{__key1__}} that is
+           replaced with value1 before the markdown itself is put into
+           the HTML templage and handled by reveal.js.
 --o <file> The html file where the compiled result is written to. This file
            can be placed into the root of the reveal.js projet at the same
            level where the index.html is located at.
@@ -188,7 +195,10 @@ class MdParser:
                 if cnt == 1:
                     try:
                         self.properties = yaml.safe_load(item)
+                        # test whether we have keys
+                        self.properties.keys()
                     except:
+                        self.properties = {}
                         self._slides.append(item)
                     
                 elif cnt > 1:
