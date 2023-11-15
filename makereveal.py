@@ -11,6 +11,8 @@ makereveal.py -i <markup_file> -t <html_template> [ -o sildesfile.html ]
 Parameters are:
 -c <theme> Select a Reveal theme, a corresponding file must exist in the
            reveal installation at css/theme/<theme>.css. Defaults to black.
+-e         Do not copy any referenced files from the slides to the folder
+           where the output file is created in.
 -i <file>  The input file that contains the markdown. Slides are divided
            by a single line containing "---" and a linebeak. Also you may
            at metadata in the first block that is enclosed by the sepa-
@@ -37,7 +39,7 @@ Parameters are:
 
 """
 
-import os, sys, re, yaml
+import os, sys, shutil, re, yaml
 
 usage = ("Usage: " + os.path.basename(sys.argv[0]) +
          " -i markup_file -t html_template ... [-o output_file]\n" +
@@ -59,7 +61,10 @@ class MdParser:
 
         self.files = []
         """ Store here the file name to read from."""
-
+        
+        self.outFile = ''
+        """ File where the output html is written to """
+        
         self.properties = {}
         """A set of key values that are set from the head of the md file
         in case there is something set."""
@@ -68,6 +73,10 @@ class MdParser:
         """The theme name to be used in the reveal.js. This is actually the
         name of the css file (without the .css suffix) in
         reveal_root/css/theme."""
+
+        self.skipExtFiles = False
+        """Marker whether referenced files should be copied to the target
+        directory"""
         
         self._slides = []
         """A list of slides."""
@@ -79,6 +88,12 @@ class MdParser:
         self._slideDelimiter = re.compile('^\-{3}\r?\n$')
         """The delimiter to separate the slides and the yaml properties
         in the markdown file."""
+        
+        self._externalFiles = {}
+        """Store here the processed files, key is the origial file,
+        value is the new file."""
+        
+        self._currentFileParsed = None
 
 
     def addFile(self, file: str):
@@ -107,6 +122,29 @@ class MdParser:
         self.theme = theme
         return self
 
+    def setDisableExternalFiles(self):
+        """Disable that external files are not copied to the target directory.
+        
+        Returns:
+        self:
+        
+        """
+        
+        self.skipExtFiles = True
+        return self
+
+    def setOutputFile(self, file: str):
+        """Set the output file where the html is written to.
+        
+        Parameters:
+        file (str): file incl. path that is written.
+        
+        Returns:
+        self:
+        """
+        self.outFile = file
+        return self
+
     def readFiles(self):
         """Read the markup files that were provided to the parser.
 
@@ -123,6 +161,7 @@ class MdParser:
                 fp = open(fname, "r")
             except:
                 dieNice('Could not open file {0}.'.format(fname))
+            self._currentFileParsed = fname
             self.parseFile(fp)
             fp.close()
         return self
@@ -153,12 +192,54 @@ class MdParser:
                 cnt += 1
                 item = ''
             else:
-                item += line
+                item += self.checkForExternalFile(line)
 
         if len(item.replace("\r", '').replace('\n', '').strip()) > 0:
             self._slides.append(item)
 
         return self
+
+    def checkForExternalFile(self, line: str)-> str:
+        """Check for file patterns like:
+        ![placeholder](external_file "placeholder tooltip")
+        If something is found, check if the file exists, copy
+        it to the current output dir and change the name and
+        reference in the original markup."""
+        
+        # If we do not want to copy external files, just quit here.
+        if self.skipExtFiles == True:
+            return line
+        
+        # Check for occurrences of references to external files.
+        for m in re.finditer('\[[^\]]*\]\(([^ \)]*)(\)| )', line):
+            if m.group(1) in self._externalFiles.keys():
+                line = line.replace(m.group(1), self._externalFiles[m.group(1)])
+                continue
+            
+            basesrc = os.path.dirname(self._currentFileParsed)
+            if basesrc != '':
+                basesrc += os.sep
+            # Check if the referenced file exists in relation to the markdown file where used.
+            if not os.path.isfile(basesrc + m.group(1)):
+                continue
+            # Create the basename for the target file that is also used in the HTML.
+            trg = ''.join([
+                os.path.splitext(os.path.basename(m.group(1)))[0],
+                '_',
+                str(len(self._externalFiles) + 1),
+                os.path.splitext(os.path.basename(m.group(1)))[1],
+            ])
+            self._externalFiles[m.group(1)] = trg
+            # Copy source file to destination...
+            basetrg = os.path.dirname(self.outFile)
+            if basetrg != '':
+                basetrg += os.sep
+            shutil.copy(basesrc + m.group(1), basetrg + trg)
+            # ... and replace the entry in the markup.
+            replacement = m.group(0).replace(m.group(1), trg)
+            line = line.replace(m.group(0), replacement)
+        return line
+
 
     def replacePlaceholder(self, properties: dict, text: str)-> str:
         """Replace all placeholders with the given set of properties. Remove
@@ -179,7 +260,6 @@ class MdParser:
         text = re.sub(r'\{\{__\w+__\}\}', '', text)
         
         return text
-
 
     def getSlidesHtml(self)-> str:
         """Get the html content that is placed within the main part
@@ -241,6 +321,26 @@ class MdParser:
         """
         
         return self._html
+        
+    def writeOutput(self):
+        """Write the resulting HTML into a file or on standard out.
+        
+        Returns:
+        self:
+        
+        """
+
+        try:
+            if len(self.outFile) == 0:
+                fp = sys.stdout
+            else:
+                fp = open(self.outFile, "w")
+        except:
+            dieNice('Could not open file %s for writing result.' % self.outFile)
+
+        fp.write(self.getHtml())
+        fp.close()
+        return self
                 
 def main():
     """Evaluate the cli arguments, built up the worklog object
@@ -248,7 +348,7 @@ def main():
     for the html file."""
 
     # List of available options that can be changed via the command line.
-    options = ['c', 'i', 'o', 't']
+    options = ['c', 'e', 'i', 'o', 't']
 
     # the output file where the result is written to, ready for use in reveal.js.
     outputFile = ''
@@ -272,13 +372,16 @@ def main():
             currentCmd = arg[1:]
             if not(currentCmd in options):
                 dieNice("Invalid argument %s." % currentCmd)
+            if currentCmd == 'e':
+                worklog.setDisableExternalFiles()
+                currentCmd = ''
         elif len(currentCmd) > 0:
             if currentCmd == 'c':
                 worklog.setTheme(arg)
             elif currentCmd == 'i':
                 worklog.addFile(arg)
             elif currentCmd == 'o':
-                outputFile = arg
+                worklog.setOutputFile(arg)
             elif currentCmd == 't':
                 templateFile = arg
             currentCmd = ''
@@ -289,19 +392,8 @@ def main():
     if len(templateFile) == 0 or not os.path.isfile(templateFile):
         dieNice('Template file "{0}" missing or does not exist.'.format(templateFile))
         
-    content = worklog.applyTemplate(templateFile)
+    worklog.applyTemplate(templateFile).writeOutput()
 
-    # and output the result into the file
-    try:
-        if len(outputFile) == 0:
-            fp = sys.stdout
-        else:
-            fp = open(outputFile, "w")
-    except:
-        dieNice('Could not open file %s for writing result.' % outputFile)
-
-    fp.write(worklog.getHtml())
-    fp.close()
 
 if __name__ == "__main__":
     main()
