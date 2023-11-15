@@ -134,7 +134,8 @@ class MdParser:
         return self
 
     def setOutputFile(self, file: str):
-        """Set the output file where the html is written to.
+        """Set the output file where the html is written to. If a directory
+        is used, check that it exists.
         
         Parameters:
         file (str): file incl. path that is written.
@@ -143,6 +144,9 @@ class MdParser:
         self:
         """
         self.outFile = file
+        basedir = os.path.dirname(file)
+        if basedir != '' and not os.path.exists(basedir):
+            raise Exception('Directory "{0}" does not exist to write output file.'.format(basedir))
         return self
 
     def readFiles(self):
@@ -381,17 +385,20 @@ def main():
             elif currentCmd == 'i':
                 worklog.addFile(arg)
             elif currentCmd == 'o':
-                worklog.setOutputFile(arg)
+                try:
+                    worklog.setOutputFile(arg)
+                except Exception as ex:
+                    dieNice(ex) 
             elif currentCmd == 't':
                 templateFile = arg
             currentCmd = ''
 
+    # Check if template file exists.
+    if len(templateFile) == 0 or not os.path.isfile(templateFile):
+        dieNice('Template file "{0}" missing or does not exist.'.format(templateFile))
     # process markup files
     worklog.readFiles()
     # apply the html template
-    if len(templateFile) == 0 or not os.path.isfile(templateFile):
-        dieNice('Template file "{0}" missing or does not exist.'.format(templateFile))
-        
     worklog.applyTemplate(templateFile).writeOutput()
 
 
