@@ -16,7 +16,8 @@ For my personal use I setup a local reveal.js installation by doing the followin
 
 1. Download the latest [reveal.js from github](https://github.com/hakimel/reveal.js/archive/master.zip)
 1. Unzip the content into an arbitrary directory
-1. Change into that directory and start a webserver by running `python3 -m http.server 8000`  
+1. Change into that directory and start a webserver by running `python3 -m http.server 3000` or
+in case of PHP `php -S localhost:3000`
 
 You can access the demo slides by calling http://localhost:3000/demo.html in your browser.
 
