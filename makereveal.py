@@ -92,7 +92,7 @@ class MdParser:
         """The final HTML of the page, that is either written to stdout
         or into the output file"""
         
-        self._slideDelimiter = re.compile('^\-{3}\r?\n$')
+        self._slideDelimiter = re.compile(r'^\-{3}\r?\n$')
         """The delimiter to separate the slides and the yaml properties
         in the markdown file."""
         
@@ -225,7 +225,7 @@ class MdParser:
             return line
         
         # Check for occurrences of references to external files.
-        for m in re.finditer('\[[^\]]*\]\(([^ \)]*)(\)| )', line):
+        for m in re.finditer(r'\[[^\]]*\]\(([^ \)]*)(\)| )', line):
             if m.group(1) in self._externalFiles.keys():
                 line = line.replace(m.group(1), self._externalFiles[m.group(1)])
                 continue
