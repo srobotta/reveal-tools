@@ -36,12 +36,12 @@ Parameters are:
            use placeholders in the markdown (e.g. {{__key1__}} that is
            replaced with value1 before the markdown itself is put into
            the HTML templage and handled by reveal.js.
---o <file> The html file where the compiled result is written to. This file
+-o <file>  The html file where the compiled result is written to. This file
            can be placed into the root of the reveal.js projet at the same
            level where the index.html is located at.
            If an output file is not given, then the content is written to
            standard out. 
---t <file> The html template where the slides and the metadata are put into.
+-t <file>  The html template where the slides and the metadata are put into.
 --help, -h Print this help information.
 
 """
@@ -229,7 +229,7 @@ class MdParser:
             if m.group(1) in self._externalFiles.keys():
                 line = line.replace(m.group(1), self._externalFiles[m.group(1)])
                 continue
-            
+                
             basesrc = os.path.dirname(self._currentFileParsed)
             if basesrc != '':
                 basesrc += os.sep
@@ -414,4 +414,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
